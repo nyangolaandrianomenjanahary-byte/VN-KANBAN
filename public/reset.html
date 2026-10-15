@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0071E3">
+  <title>Nouveau mot de passe — VN Kanban</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/vendor/fonts/inter.css">
+  <link rel="stylesheet" href="/css/vn-auth.css">
+  <script src="/js/vn-auth.js"></script>
+  <script src="/js/vn-reset.js" defer></script>
+</head>
+<body>
+  <div class="vn-page">
+    <aside class="vn-aside">
+      <div class="vn-aside-brand">
+        <span class="vn-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7h16M4 12h10M4 17h7"></path>
+            <path d="M17 14l2 2 4-4" stroke="#34C759"></path>
+          </svg>
+        </span>
+        <div>
+          <strong>VN Kanban</strong>
+          <span>Réinitialisation du mot de passe</span>
+        </div>
+      </div>
+      <div class="vn-aside-body">
+        <h2>Choisissez un nouveau mot de passe.</h2>
+        <p>Le lien de réinitialisation est à usage unique et expire au bout d'une heure. Toutes vos autres sessions seront déconnectées par sécurité.</p>
+        <ul class="vn-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+            <span>Votre mot de passe est transformé dans le navigateur avant l'envoi</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+            <span>Le lien ne peut pas être réutilisé une seconde fois</span>
+          </li>
+        </ul>
+      </div>
+      <div class="vn-aside-foot">Hébergé sur Cloudflare · données stockées en base D1</div>
+    </aside>
+
+    <main class="vn-main">
+      <section class="vn-card" aria-labelledby="card-title">
+        <h1 id="card-title">Nouveau mot de passe</h1>
+        <p class="vn-sub">Il doit contenir au moins 8 caractères.</p>
+
+        <div id="alert-slot" aria-live="polite"></div>
+
+        <form id="panel-reset" novalidate>
+          <div class="vn-field">
+            <label for="reset-password">Nouveau mot de passe</label>
+            <div class="vn-input-wrap">
+              <input class="vn-input with-action" type="password" id="reset-password" autocomplete="new-password"
+                     placeholder="8 caractères minimum" required>
+              <button type="button" class="vn-input-action" data-toggle-password="reset-password" aria-label="Afficher le mot de passe">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="vn-strength" id="reset-strength" data-score="0" aria-hidden="true">
+              <div class="vn-strength-bars"><span></span><span></span><span></span><span></span></div>
+              <div class="vn-strength-label" id="reset-strength-label">8 caractères minimum</div>
+            </div>
+          </div>
+
+          <div class="vn-field">
+            <label for="reset-confirm">Confirmer le mot de passe</label>
+            <input class="vn-input" type="password" id="reset-confirm" autocomplete="new-password"
+                   placeholder="Répétez le mot de passe" required>
+            <div class="vn-hint" id="mismatch" hidden>Les deux mots de passe ne correspondent pas.</div>
+          </div>
+
+          <button type="submit" class="vn-btn vn-btn-primary" id="reset-submit">Enregistrer</button>
+        </form>
+
+        <a class="vn-btn vn-btn-ghost" href="/login" style="margin-top:12px">Retour à la connexion</a>
+
+        <div class="vn-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 118 0v3"/></svg>
+          <span>Lien à usage unique · expire en 1 heure</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="vn-loading" id="loading" aria-live="polite">
+    <div>
+      <div class="vn-spinner"></div>
+      <div class="vn-loading-text" id="loading-text">Enregistrement…</div>
+    </div>
+  </div>
+</body>
+</html>

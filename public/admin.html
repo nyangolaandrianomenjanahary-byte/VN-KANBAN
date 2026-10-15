@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0071E3">
+  <title>Administration — VN Kanban</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/vendor/fonts/inter.css">
+  <link rel="stylesheet" href="/css/vn-auth.css">
+  <script src="/js/vn-auth.js"></script>
+  <script src="/js/vn-admin.js" defer></script>
+</head>
+<body>
+  <div class="vn-admin">
+    <header class="vn-admin-header">
+      <h1>
+        Administration
+        <span class="vn-badge vn-badge-root" id="role-badge">ROOT</span>
+      </h1>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <a class="vn-btn vn-btn-ghost vn-btn-sm" href="/">← Retour au tableau</a>
+        <span id="who" style="font-size:13.5px;color:var(--text-muted)"></span>
+        <button class="vn-btn vn-btn-ghost vn-btn-sm" id="logout">Se déconnecter</button>
+      </div>
+    </header>
+
+    <div id="alert-slot" aria-live="polite"></div>
+
+    <!-- Vue d'ensemble -->
+    <section id="section-overview">
+      <div class="vn-stats-grid" id="stats-grid">
+        <div class="vn-stat-card"><div class="label">Comptes</div><div class="value" id="stat-users">–</div><div class="sub" id="stat-users-sub"></div></div>
+        <div class="vn-stat-card"><div class="label">Tableaux</div><div class="value" id="stat-boards">–</div><div class="sub" id="stat-boards-sub"></div></div>
+        <div class="vn-stat-card"><div class="label">Sessions actives</div><div class="value" id="stat-sessions">–</div><div class="sub">connexions en cours</div></div>
+        <div class="vn-stat-card"><div class="label">Écritures journalisées</div><div class="value" id="stat-audit">–</div><div class="sub">90 derniers jours</div></div>
+      </div>
+
+      <div class="vn-panel">
+        <div class="vn-panel-head"><h2>Configuration du serveur</h2></div>
+        <div class="vn-panel-body">
+          <dl class="vn-kv" id="config-list"></dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- Utilisateurs -->
+    <section id="section-users">
+      <div class="vn-panel">
+        <div class="vn-panel-head">
+          <h2>Comptes utilisateurs</h2>
+          <div class="spacer"></div>
+          <div class="vn-toolbar">
+            <input class="vn-input" type="search" id="user-search" placeholder="Rechercher (e-mail, nom)…" autocomplete="off">
+            <select id="user-role" aria-label="Filtrer par rôle">
+              <option value="">Tous les rôles</option>
+              <option value="root">ROOT</option>
+              <option value="admin">Admin</option>
+              <option value="user">Utilisateur</option>
+            </select>
+            <select id="user-status" aria-label="Filtrer par statut">
+              <option value="">Tous les statuts</option>
+              <option value="active">Actifs</option>
+              <option value="suspended">Suspendus</option>
+            </select>
+            <button class="vn-btn vn-btn-primary vn-btn-sm" id="btn-new-user">+ Nouveau compte</button>
+          </div>
+        </div>
+        <div class="vn-table-wrap">
+          <table class="vn-table">
+            <thead>
+              <tr>
+                <th>Compte</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Connexion</th>
+                <th>Tableau</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-body">
+              <tr><td colspan="6" class="vn-empty">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="vn-panel-body" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <span id="users-count" style="font-size:13.5px;color:var(--text-muted)"></span>
+          <div style="display:flex;gap:8px">
+            <button class="vn-btn vn-btn-ghost vn-btn-sm" id="page-prev">← Précédent</button>
+            <span id="page-label" style="font-size:13.5px;align-self:center;color:var(--text-muted)"></span>
+            <button class="vn-btn vn-btn-ghost vn-btn-sm" id="page-next">Suivant →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sauvegardes -->
+    <section id="section-backup">
+      <div class="vn-panel">
+        <div class="vn-panel-head"><h2>Sauvegarde et restauration</h2></div>
+        <div class="vn-panel-body">
+          <div class="vn-alert vn-alert-info" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span>L'export contient tous les comptes et tous les tableaux Kanban, <strong>sans les mots de passe</strong> (seules leurs empreintes sont stockées, et elles ne sont jamais exportées).</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a class="vn-btn vn-btn-primary vn-btn-sm" href="/api/admin/backup" id="btn-backup">⬇︎ Exporter la sauvegarde complète</a>
+            <button class="vn-btn vn-btn-ghost vn-btn-sm" id="btn-restore">⬆︎ Restaurer depuis un fichier…</button>
+            <input type="file" id="restore-file" accept="application/json,.json" hidden>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Journal -->
+    <section id="section-audit">
+      <div class="vn-panel">
+        <div class="vn-panel-head">
+          <h2>Journal d'audit</h2>
+          <div class="spacer"></div>
+          <div class="vn-toolbar">
+            <select id="audit-filter" aria-label="Filtrer le journal">
+              <option value="">Toutes les actions</option>
+              <option value="auth.login">Connexions</option>
+              <option value="auth.login.failed">Échecs de connexion</option>
+              <option value="auth.register">Inscriptions</option>
+              <option value="auth.google.login">Connexions Google</option>
+              <option value="data.save">Enregistrements de tableau</option>
+              <option value="admin.user.create">Créations de compte</option>
+              <option value="admin.user.update">Modifications de compte</option>
+              <option value="admin.user.delete">Suppressions de compte</option>
+              <option value="admin.backup.export">Exports de sauvegarde</option>
+            </select>
+            <button class="vn-btn vn-btn-ghost vn-btn-sm" id="btn-audit-refresh">Rafraîchir</button>
+          </div>
+        </div>
+        <div class="vn-log" id="audit-log"><div class="vn-empty">Chargement…</div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Fenêtre modale générique -->
+  <div class="vn-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="vn-modal-card">
+      <h3 id="modal-title">Titre</h3>
+      <p id="modal-text"></p>
+      <div id="modal-body"></div>
+      <div class="vn-modal-actions">
+        <button class="vn-btn vn-btn-ghost vn-btn-sm" id="modal-cancel">Annuler</button>
+        <button class="vn-btn vn-btn-primary vn-btn-sm" id="modal-confirm">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="vn-toast" id="toast"></div>
+
+  <div class="vn-loading" id="loading">
+    <div>
+      <div class="vn-spinner"></div>
+      <div class="vn-loading-text" id="loading-text">Chargement…</div>
+    </div>
+  </div>
+</body>
+</html>
