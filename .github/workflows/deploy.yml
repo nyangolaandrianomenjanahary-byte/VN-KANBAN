@@ -1,0 +1,96 @@
+name: Vérifications et déploiement
+
+# 1. À chaque modification : les 213 vérifications tournent sur un serveur local.
+# 2. Sur « main » : si les secrets Cloudflare sont configurés, l'application est
+#    déployée automatiquement (sinon l'étape est simplement ignorée).
+#
+# Secrets à configurer (GitHub → Settings → Secrets and variables → Actions) :
+#   CLOUDFLARE_API_TOKEN   Cloudflare → My Profile → API Tokens →
+#                          modèle « Edit Cloudflare Workers »
+#   CLOUDFLARE_ACCOUNT_ID  Cloudflare → Workers & Pages → Account ID
+#
+# Voir docs/DEPLOIEMENT-CLOUDFLARE.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: vn-kanban-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Vérifications (213)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Vérification de la syntaxe
+        run: |
+          for f in worker/index.js worker/lib/*.js worker/routes/*.js public/js/*.js scripts/*.mjs tests/*.mjs; do
+            node --check "$f"
+          done
+
+      - name: Préparation de la base locale
+        run: |
+          printf 'PASSWORD_PEPPER=pepper-de-test-ci\nALLOW_SIGNUP=true\nFIRST_USER_IS_ROOT=true\nROOT_BOOTSTRAP_TOKEN=jeton-de-test-ci\n' > .dev.vars
+          npx wrangler d1 migrations apply vn-kanban-db --local
+
+      - name: Démarrage du Worker local
+        run: |
+          npx wrangler dev --ip 127.0.0.1 --port 8787 > /tmp/wrangler.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8787/api/health > /dev/null; then echo "Serveur prêt."; exit 0; fi
+            sleep 2
+          done
+          echo "Le serveur local n'a pas démarré :"; cat /tmp/wrangler.log; exit 1
+
+      - name: Suite complète
+        env:
+          ROOT_BOOTSTRAP_TOKEN: jeton-de-test-ci
+        run: npm test
+
+      - name: Flux Google (Google simulé)
+        run: npm run test:google
+
+      - name: Journal du Worker en cas d'échec
+        if: failure()
+        run: tail -n 200 /tmp/wrangler.log
+
+  deploy:
+    name: Mise en ligne
+    needs: tests
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      secrets.CLOUDFLARE_API_TOKEN != '' &&
+      secrets.CLOUDFLARE_ACCOUNT_ID != ''
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Application du schéma (base distante)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: d1 migrations apply vn-kanban-db --remote
+      - name: Déploiement
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

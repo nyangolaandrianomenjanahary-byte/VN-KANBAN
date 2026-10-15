@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0071E3">
+  <title>Connexion — VN Kanban</title>
+  <meta name="description" content="Connexion sécurisée à VN Kanban : e-mail, mot de passe ou compte Google.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/vendor/fonts/inter.css">
+  <link rel="stylesheet" href="/css/vn-auth.css">
+  <script src="/js/vn-auth.js"></script>
+  <script src="/js/vn-login.js" defer></script>
+</head>
+<body>
+  <div class="vn-page">
+    <!-- Colonne de présentation -->
+    <aside class="vn-aside">
+      <div class="vn-aside-brand">
+        <span class="vn-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7h16M4 12h10M4 17h7"></path>
+            <path d="M17 14l2 2 4-4" stroke="#34C759"></path>
+          </svg>
+        </span>
+        <div>
+          <strong>VN Kanban</strong>
+          <span>Gestionnaire de tâches</span>
+        </div>
+      </div>
+
+      <div class="vn-aside-body">
+        <h2>Vos tâches, au même endroit, sur tous vos appareils.</h2>
+        <p>Connectez-vous pour retrouver votre tableau, vos notes et votre archive — synchronisés et sauvegardés automatiquement.</p>
+        <ul class="vn-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+            <span>Tableau Kanban, notes liées aux tâches, chronomètre et bilan de journée</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+            <span>Synchronisation automatique : une modification, tous vos appareils à jour</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+            <span>Sauvegardes chiffrées côté serveur, historique et restauration par l'administrateur</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+            <span>Votre mot de passe n'est jamais transmis : il est transformé dans votre navigateur</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="vn-aside-foot">Hébergé sur Cloudflare · données stockées en base D1</div>
+    </aside>
+
+    <!-- Colonne formulaire -->
+    <main class="vn-main">
+      <section class="vn-card" aria-labelledby="card-title">
+        <h1 id="card-title">Bon retour&nbsp;👋</h1>
+        <p class="vn-sub" id="card-sub">Connectez-vous pour accéder à vos tâches.</p>
+
+        <div id="alert-slot" aria-live="polite"></div>
+
+        <div id="setup-notice"></div>
+
+        <!-- Onglets -->
+        <div class="vn-tabs" role="tablist" aria-label="Connexion ou création de compte" id="tabs">
+          <button class="vn-tab" role="tab" id="tab-login" aria-selected="true" aria-controls="panel-login" type="button">Connexion</button>
+          <button class="vn-tab" role="tab" id="tab-signup" aria-selected="false" aria-controls="panel-signup" type="button">Créer un compte</button>
+        </div>
+
+        <!-- Formulaire de connexion -->
+        <form id="panel-login" role="tabpanel" aria-labelledby="tab-login" novalidate>
+          <div class="vn-field">
+            <label for="login-email">Adresse e-mail</label>
+            <input class="vn-input" type="email" id="login-email" name="email" autocomplete="username"
+                   inputmode="email" spellcheck="false" placeholder="vous@exemple.com" required>
+          </div>
+
+          <div class="vn-field">
+            <label for="login-password">Mot de passe</label>
+            <div class="vn-input-wrap">
+              <input class="vn-input with-action" type="password" id="login-password" name="password"
+                     autocomplete="current-password" placeholder="Votre mot de passe" required>
+              <button type="button" class="vn-input-action" data-toggle-password="login-password" aria-label="Afficher le mot de passe">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="vn-hint warn" id="caps-lock" hidden>⚠︎ La touche Verr. Maj semble activée.</div>
+          </div>
+
+          <div class="vn-row-between">
+            <label class="vn-checkbox">
+              <input type="checkbox" id="login-remember" checked> Rester connecté 30 jours
+            </label>
+            <a href="#" id="link-forgot">Mot de passe oublié&nbsp;?</a>
+          </div>
+
+          <button type="submit" class="vn-btn vn-btn-primary" id="login-submit">Se connecter</button>
+        </form>
+
+        <!-- Formulaire d'inscription -->
+        <form id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" novalidate hidden>
+          <div class="vn-field">
+            <label for="signup-name">Nom (facultatif)</label>
+            <input class="vn-input" type="text" id="signup-name" name="name" autocomplete="name" placeholder="Votre nom">
+          </div>
+
+          <div class="vn-field">
+            <label for="signup-email">Adresse e-mail</label>
+            <input class="vn-input" type="email" id="signup-email" name="email" autocomplete="email"
+                   inputmode="email" spellcheck="false" placeholder="vous@exemple.com" required>
+          </div>
+
+          <div class="vn-field">
+            <label for="signup-password">Mot de passe</label>
+            <div class="vn-input-wrap">
+              <input class="vn-input with-action" type="password" id="signup-password" name="password"
+                     autocomplete="new-password" placeholder="8 caractères minimum" required>
+              <button type="button" class="vn-input-action" data-toggle-password="signup-password" aria-label="Afficher le mot de passe">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="vn-strength" id="signup-strength" data-score="0" aria-hidden="true">
+              <div class="vn-strength-bars"><span></span><span></span><span></span><span></span></div>
+              <div class="vn-strength-label" id="signup-strength-label">8 caractères minimum</div>
+            </div>
+          </div>
+
+          <label class="vn-checkbox" style="margin:6px 0 18px">
+            <input type="checkbox" id="signup-terms" checked>
+            <span>J'accepte que mes tâches soient stockées sur ce serveur.</span>
+          </label>
+
+          <button type="submit" class="vn-btn vn-btn-primary" id="signup-submit">Créer mon compte</button>
+        </form>
+
+        <!-- Changement de mot de passe imposé -->
+        <form id="panel-mustreset" novalidate hidden>
+          <div class="vn-alert vn-alert-warn" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+            <span>Votre mot de passe a été défini par l'administrateur. Choisissez-en un nouveau pour continuer.</span>
+          </div>
+          <div class="vn-field">
+            <label for="mustreset-password">Nouveau mot de passe</label>
+            <div class="vn-input-wrap">
+              <input class="vn-input with-action" type="password" id="mustreset-password" autocomplete="new-password" placeholder="8 caractères minimum" required>
+              <button type="button" class="vn-input-action" data-toggle-password="mustreset-password" aria-label="Afficher le mot de passe">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="vn-strength" id="mustreset-strength" data-score="0" aria-hidden="true">
+              <div class="vn-strength-bars"><span></span><span></span><span></span><span></span></div>
+              <div class="vn-strength-label" id="mustreset-strength-label">8 caractères minimum</div>
+            </div>
+          </div>
+          <button type="submit" class="vn-btn vn-btn-primary" id="mustreset-submit">Enregistrer le nouveau mot de passe</button>
+        </form>
+
+        <!-- Changement de mot de passe volontaire (/login?changepassword=1) -->
+        <form id="panel-changepassword" novalidate hidden>
+          <div class="vn-alert vn-alert-info" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span>Pour votre sécurité, toutes les autres sessions seront déconnectées.</span>
+          </div>
+          <div class="vn-field">
+            <label for="cp-current">Mot de passe actuel</label>
+            <div class="vn-input-wrap">
+              <input class="vn-input with-action" type="password" id="cp-current" autocomplete="current-password" required>
+              <button type="button" class="vn-input-action" data-toggle-password="cp-current" aria-label="Afficher le mot de passe">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="vn-field">
+            <label for="cp-new">Nouveau mot de passe</label>
+            <div class="vn-input-wrap">
+              <input class="vn-input with-action" type="password" id="cp-new" autocomplete="new-password" placeholder="8 caractères minimum" required>
+              <button type="button" class="vn-input-action" data-toggle-password="cp-new" aria-label="Afficher le mot de passe">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="vn-strength" id="cp-strength" data-score="0" aria-hidden="true">
+              <div class="vn-strength-bars"><span></span><span></span><span></span><span></span></div>
+              <div class="vn-strength-label" id="cp-strength-label">8 caractères minimum</div>
+            </div>
+          </div>
+          <div class="vn-field">
+            <label for="cp-confirm">Confirmer le nouveau mot de passe</label>
+            <input class="vn-input" type="password" id="cp-confirm" autocomplete="new-password" required>
+          </div>
+          <button type="submit" class="vn-btn vn-btn-primary" id="cp-submit">Enregistrer le mot de passe</button>
+          <button type="button" class="vn-btn vn-btn-ghost" id="cp-back" style="margin-top:10px">Revenir à l’application</button>
+        </form>
+
+        <!-- Mot de passe oublié -->
+        <form id="panel-forgot" novalidate hidden>
+          <div class="vn-field">
+            <label for="forgot-email">Adresse e-mail du compte</label>
+            <input class="vn-input" type="email" id="forgot-email" inputmode="email" placeholder="vous@exemple.com" required>
+          </div>
+          <button type="submit" class="vn-btn vn-btn-primary" id="forgot-submit">Envoyer la demande</button>
+          <button type="button" class="vn-btn vn-btn-ghost" id="forgot-back" style="margin-top:10px">Revenir à la connexion</button>
+        </form>
+
+        <!-- Connexion Google -->
+        <div id="google-block">
+          <div class="vn-or"><span>ou</span></div>
+          <a class="vn-btn vn-btn-google" id="google-btn" href="/api/auth/google/start">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.2 24.5c0-1.6-.1-3.2-.4-4.7H24v9.1h12.5c-.6 3-2.3 5.6-4.8 7.3l7.6 5.9c4.4-4.1 6.9-10.1 6.9-17.6z"/>
+              <path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-2.9-.8-4.5s.3-3.1.8-4.5l-7.8-6.1C.9 16.7 0 20.2 0 24s.9 7.3 2.6 10.4l7.8-5.7z"/>
+              <path fill="#34A853" d="M24 48c6.2 0 11.5-2 15.3-5.6l-7.6-5.9c-2.1 1.4-4.8 2.2-7.7 2.2-6.3 0-11.7-3.7-13.6-9.1l-7.8 5.7C6.5 42.6 14.6 48 24 48z"/>
+            </svg>
+            Continuer avec Google
+          </a>
+          <div class="vn-hint" id="google-hint" style="text-align:center;margin-top:8px"></div>
+        </div>
+
+        <div class="vn-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 118 0v3"/></svg>
+          <span>Connexion chiffrée (HTTPS). Session protégée par cookie HttpOnly.</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="vn-loading" id="loading" aria-live="polite">
+    <div>
+      <div class="vn-spinner"></div>
+      <div class="vn-loading-text" id="loading-text">Connexion…</div>
+    </div>
+  </div>
+</body>
+</html>

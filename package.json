@@ -1,0 +1,31 @@
+{
+  "name": "vn-kanban",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VN — Gestionnaire de tâches Kanban avec authentification e-mail et Google, base de données Cloudflare D1 et console ROOT.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --ip 0.0.0.0 --port 8787",
+    "deploy": "wrangler deploy",
+    "setup": "node scripts/setup-cloudflare.mjs",
+    "db:migrate": "wrangler d1 migrations apply vn-kanban-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply vn-kanban-db --remote",
+    "db:reset": "node scripts/db-reset.mjs",
+    "db:users": "wrangler d1 execute vn-kanban-db --local --command \"SELECT id, email, role, status, created_at FROM users;\"",
+    "root:create": "node scripts/create-root.mjs",
+    "test": "node scripts/db-reset.mjs && node tests/smoke.mjs && node tests/client-lib.mjs && node tests/pages.mjs && node tests/app-integration.mjs",
+    "test:api": "node tests/smoke.mjs",
+    "test:client": "node tests/client-lib.mjs",
+    "test:pages": "node tests/pages.mjs",
+    "test:app": "node tests/app-integration.mjs",
+    "test:google": "node tests/google-oauth.mjs",
+    "logs": "wrangler tail"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.3",
+    "wrangler": "^4.151.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,24 @@
+# ============================================================================
+#  En-têtes de sécurité appliqués aux fichiers statiques (HTML, CSS, JS, polices).
+#  Les réponses de l'API sont protégées directement par le Worker.
+#
+#  Remarque : la politique de sécurité du contenu (CSP) autorise « unsafe-inline »
+#  pour les scripts et les styles, car l'application VN est un fichier HTML
+#  autonome qui contient son propre code. La protection contre l'injection passe
+#  par l'échappement systématique des données affichées.
+#
+#  Pour interdire l'intégration de l'application dans une iframe, décommentez les
+#  deux dernières lignes (utile si vous ne l'affichez jamais dans Notion, etc.).
+# ============================================================================
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), usb=(), payment=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'
+#  X-Frame-Options: DENY
+#  Content-Security-Policy: frame-ancestors 'none'
+
+# Les polices et les fichiers vendus ne changent jamais : mise en cache longue.
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
