@@ -188,6 +188,33 @@ async function main() {
   });
   check('écriture depuis une origine tierce refusée (403)', badOrigin.status === 403, `reçu ${badOrigin.status}`);
 
+  // Derrière un relais inverse (proxy du serveur de développement, hébergement
+  // intermédiaire), la requête vue par le Worker peut porter un autre hôte. Le
+  // relais l'annonce alors dans X-Forwarded-Host : la page doit continuer à
+  // fonctionner, mais toujours pas depuis une origine tierce.
+  const proxyOrigin = `https://${new URL(BASE).hostname.replace(/[^a-z0-9.-]/gi, '')}.proxy.example`;
+  const throughProxy = await root.fetch('/api/auth/login', {
+    method: 'POST',
+    body: { email: 'inconnu@exemple.test', password: 'AAAA' },
+    headers: { 'X-Forwarded-Host': new URL(proxyOrigin).host, 'X-Forwarded-Proto': 'https', Origin: proxyOrigin }
+  });
+  check(
+    'une écriture derrière un relais inverse est acceptée (l’origine correspond)',
+    throughProxy.status === 401,
+    `reçu ${throughProxy.status} (401 = identifiants refusés, donc origine acceptée)`
+  );
+
+  const proxyWrite = await root.fetch('/api/auth/logout', {
+    method: 'POST',
+    body: {},
+    headers: { 'X-Forwarded-Host': new URL(proxyOrigin).host, Origin: 'https://site-malveillant.example' }
+  });
+  check(
+    'une écriture via relais depuis une origine tierce est refusée',
+    proxyWrite.status === 403,
+    `reçu ${proxyWrite.status}`
+  );
+
   /* ---------------- 5. Synchronisation des données ---------------- */
   section('5. Synchronisation du tableau Kanban');
   const emptyBoard = await root.fetch('/api/data');

@@ -117,17 +117,50 @@ function guardOrigin(request, env) {
   const method = request.method.toUpperCase();
   if (!MUTATING.has(method)) return;
 
+  // Origines et hôtes considérés comme « nous-mêmes ».
   const selfOrigins = new Set();
-  try {
-    selfOrigins.add(new URL(request.url).origin);
-  } catch {
-    /* ignore */
+  const selfHosts = new Set();
+  const addOrigin = (value) => {
+    if (!value) return;
+    try {
+      const url = new URL(value);
+      selfOrigins.add(url.origin);
+      selfHosts.add(url.host);
+    } catch {
+      /* valeur invalide : ignorée */
+    }
+  };
+
+  addOrigin(request.url);
+  if (request.headers.get('Host')) addOrigin(`https://${request.headers.get('Host')}`);
+  if (env.APP_URL) addOrigin(String(env.APP_URL));
+
+  // Relais inverse (proxy du serveur de développement, hébergement intermédiaire) :
+  // ces en-têtes sont posés par le relais, pas par le navigateur. Un site tiers ne
+  // peut ni les poser sur une requête de formulaire, ni faire correspondre
+  // l'en-tête Origin, qui reste, lui, toujours maîtrisé par le navigateur.
+  const forwardedHost = request.headers.get('X-Forwarded-Host');
+  const forwardedProto = request.headers.get('X-Forwarded-Proto') || 'https';
+  if (forwardedHost) {
+    addOrigin(`${forwardedProto.split(',')[0].trim()}://${forwardedHost.split(',')[0].trim()}`);
   }
-  if (env.APP_URL) selfOrigins.add(String(env.APP_URL).replace(/\/+$/, ''));
 
   const origin = request.headers.get('Origin');
-  if (origin && !selfOrigins.has(origin.replace(/\/+$/, ''))) {
-    throw new HttpError(403, 'bad_origin', 'Origine non autorisée.');
+  if (origin) {
+    let originHost = null;
+    try {
+      originHost = new URL(origin).host;
+    } catch {
+      throw new HttpError(403, 'bad_origin', 'Origine illisible.');
+    }
+    // On compare d'abord l'origine complète (le cas normal), puis l'hôte seul :
+    // certains hébergeurs (et le serveur de développement) placent un proxy
+    // devant le Worker, auquel cas le protocole vu par le Worker peut différer
+    // du protocole réel. L'hôte, lui, reste fiable : le navigateur ne laisse
+    // jamais une page tierce envoyer cet en-tête pour notre domaine.
+    if (!selfOrigins.has(origin.replace(/\/+$/, '')) && !selfHosts.has(originHost)) {
+      throw new HttpError(403, 'bad_origin', 'Origine non autorisée.');
+    }
   }
 
   const client = request.headers.get('X-VN-Client');

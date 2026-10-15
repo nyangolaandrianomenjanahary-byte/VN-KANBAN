@@ -12,7 +12,7 @@ sur l'offre **gratuite**.
 | **Rôle ROOT** | Console complète : comptes, rôles, suspensions, tableaux, sauvegardes, journal |
 | **Synchronisation** | Automatique (1,5 s après une modification) + récupération multi-appareil |
 | **Hors ligne** | Toujours possible (dossier Root local ou localStorage, comme avant) |
-| **Tests** | 211 vérifications automatiques, dont le flux Google complet |
+| **Tests** | 213 vérifications automatiques, dont le flux Google complet |
 
 ---
 
@@ -159,7 +159,7 @@ docs/                   déploiement, Google, sécurité, synchronisation
 ## 5. Tests
 
 ```bash
-npm test              # 180 vérifications (API + bibliothèque client + pages + intégration)
+npm test              # 182 vérifications (API + bibliothèque client + pages + intégration)
 npm run test:google   # 31 vérifications du flux Google (avec un Google simulé)
 ```
 
