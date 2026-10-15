@@ -186,7 +186,7 @@ Par honnêteté, voici les limites assumées :
 ## 11. Vérifier soi-même
 
 ```bash
-npm test                # 177 vérifications, dont force brute, CSRF, conflits, ROOT
+npm test                # 180 vérifications, dont force brute, CSRF, conflits, ROOT
 npm run test:google     # 31 vérifications : PKCE, état, signature RS256, jetons falsifiés
 ```
 

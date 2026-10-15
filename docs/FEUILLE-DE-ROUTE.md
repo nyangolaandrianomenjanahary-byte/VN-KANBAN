@@ -67,7 +67,7 @@ ordre** — sans promettre de fonctionnalité non testée.
 * Documents : `README.md`, `docs/DEPLOIEMENT-CLOUDFLARE.md`, `docs/GOOGLE-OAUTH.md`,
   `docs/ARCHITECTURE.md`, `docs/SECURITE.md`, `docs/SYNCHRONISATION.md`.
 * Déploiement automatique GitHub → Cloudflare (facultatif, désactivé sans secrets).
-* **208 vérifications automatiques** (177 sans Google, 31 pour le flux Google complet contre un Google simulé).
+* **211 vérifications automatiques** (180 sans Google, 31 pour le flux Google complet contre un Google simulé).
 
 ---
 
@@ -128,7 +128,7 @@ code**, et ne rien annoncer qui ne soit constaté. Les suites existantes servent
 non-régression :
 
 ```bash
-npm test              # API + client + pages + intégration (177 vérifications)
+npm test              # API + client + pages + intégration (180 vérifications)
 npm run test:google   # flux Google (31 vérifications)
 ```
 

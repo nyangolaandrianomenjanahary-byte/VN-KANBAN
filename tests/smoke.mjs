@@ -9,7 +9,7 @@
  * Variables : BASE_URL (défaut http://127.0.0.1:8787)
  */
 
-import { resetRateLimits } from './helpers/db.mjs';
+import { resetLocalDatabase } from './helpers/db.mjs';
 
 const BASE = (process.env.BASE_URL || 'http://127.0.0.1:8787').replace(/\/+$/, '');
 const HEADERS = { 'X-VN-Client': 'web' };
@@ -112,7 +112,7 @@ function randomEmail(prefix) {
 
 async function main() {
   // Les tests créent de nombreux comptes : on repart de compteurs vierges.
-  resetRateLimits();
+  resetLocalDatabase();
   console.log(`\u001b[1mVN Kanban — tests d'intégration\u001b[0m  (${BASE})`);
 
   const root = new Client('root');
@@ -540,6 +540,38 @@ async function main() {
     }
   } else {
     console.log('  (amorçage désactivé sur ce serveur : tests dédiés ignorés)');
+  }
+
+  /* ---------------- 17. Script en ligne de commande create-root ---------------- */
+  section('17. Script create-root.mjs (ligne de commande)');
+  const bootstrapTokenForCli = process.env.ROOT_BOOTSTRAP_TOKEN || '';
+  if (bootstrapTokenForCli && setupStatus.json.bootstrapEnabled) {
+    const { spawnSync } = await import('node:child_process');
+    const cliEmail = randomEmail('root-script');
+    const cliPassword = 'MotDePasseScript!2026';
+    const cli = spawnSync(
+      process.execPath,
+      [
+        'scripts/create-root.mjs',
+        '--url', BASE,
+        '--token', bootstrapTokenForCli,
+        '--email', cliEmail,
+        '--name', 'ROOT script',
+        '--password', cliPassword
+      ],
+      { encoding: 'utf8', cwd: new URL('..', import.meta.url).pathname }
+    );
+    const cliOutput = `${cli.stdout || ''}${cli.stderr || ''}`;
+    check('le script se termine sans erreur', cli.status === 0, cliOutput.slice(-200));
+    check('le script confirme la création', /Compte ROOT prêt/.test(cliOutput), cliOutput.slice(-160));
+
+    const cliLogin = await new Client('root-script-login').fetch('/api/auth/login', {
+      method: 'POST',
+      body: { email: cliEmail, password: await prehash(cliPassword), kdf: 'v1' }
+    });
+    check('le compte créé par le script peut se connecter', cliLogin.status === 200, `reçu ${cliLogin.status}`);
+  } else {
+    console.log('  (jeton d’amorçage non fourni : script non testé)');
   }
 
   /* ---------------- Bilan ---------------- */

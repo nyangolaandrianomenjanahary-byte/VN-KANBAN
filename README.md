@@ -12,7 +12,7 @@ sur l'offre **gratuite**.
 | **Rôle ROOT** | Console complète : comptes, rôles, suspensions, tableaux, sauvegardes, journal |
 | **Synchronisation** | Automatique (1,5 s après une modification) + récupération multi-appareil |
 | **Hors ligne** | Toujours possible (dossier Root local ou localStorage, comme avant) |
-| **Tests** | 208 vérifications automatiques, dont le flux Google complet |
+| **Tests** | 211 vérifications automatiques, dont le flux Google complet |
 
 ---
 
@@ -159,20 +159,20 @@ docs/                   déploiement, Google, sécurité, synchronisation
 ## 5. Tests
 
 ```bash
-npm test              # 177 vérifications (API + bibliothèque client + pages + intégration)
+npm test              # 180 vérifications (API + bibliothèque client + pages + intégration)
 npm run test:google   # 31 vérifications du flux Google (avec un Google simulé)
 ```
 
 | Suite | Ce qui est vérifié |
 |---|---|
-| `tests/smoke.mjs` | Inscription, connexion, sessions, verrouillage anti-force brute, CSRF, synchronisation, conflits, console ROOT, sauvegarde/restauration, réinitialisation, amorçage |
+| `tests/smoke.mjs` | Inscription, connexion, sessions, verrouillage anti-force brute, CSRF, synchronisation, conflits, console ROOT, sauvegarde/restauration, réinitialisation, amorçage, script `create-root` |
 | `tests/client-lib.mjs` | La **vraie** bibliothèque du navigateur : pré-hachage PBKDF2, gestion des erreurs, redirections |
 | `tests/pages.mjs` | Les pages réelles dans jsdom (DOM) : formulaires, onglets, messages d'erreur, changement de mot de passe, console d'administration |
 | `tests/app-integration.mjs` | L'application complète : démarrage avec session, chargement de la base serveur, envoi automatique, récupération distante, résolution de conflit |
 | `tests/google-oauth.mjs` | Flux Google complet avec un faux serveur Google : PKCE, état anti-CSRF, vérification RS256, création/liaison de compte, rejet des jetons falsifiés |
 
 Les tests supposent que `npm run dev` tourne dans un autre terminal.
-`npm test` vide d'abord la base **locale** (jamais la base distante).
+Chaque suite vide d'abord la base **locale** (jamais la base distante) : les comptes de test restent donc sans effet sur vos vraies données.
 
 ---
 

@@ -1,6 +1,6 @@
 name: Vérifications et déploiement
 
-# 1. À chaque modification : les 208 vérifications tournent sur un serveur local.
+# 1. À chaque modification : les 211 vérifications tournent sur un serveur local.
 # 2. Sur « main » : si les secrets Cloudflare sont configurés, l'application est
 #    déployée automatiquement (sinon l'étape est simplement ignorée).
 #
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   tests:
-    name: Vérifications (208)
+    name: Vérifications (211)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

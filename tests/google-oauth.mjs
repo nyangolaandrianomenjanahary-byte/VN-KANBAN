@@ -20,7 +20,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import { rmSync, mkdirSync } from 'node:fs';
 import process from 'node:process';
-import { resetRateLimits } from './helpers/db.mjs';
+import { resetLocalDatabase } from './helpers/db.mjs';
 
 const APP_PORT = Number(process.env.GOOGLE_TEST_APP_PORT || 8790);
 const MOCK_PORT = Number(process.env.GOOGLE_TEST_MOCK_PORT || 8799);

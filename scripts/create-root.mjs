@@ -144,8 +144,9 @@ async function main() {
   console.log('\nTransformation du mot de passe (PBKDF2, 210 000 itérations)…');
   const body = { email, name: name || undefined, promoteOnly };
   if (password) {
-    const stretched = await prehashFor(password);
-    body.password = stretched.value;
+    // prehashFor() renvoie directement l'empreinte base64url attendue par l'API,
+    // exactement comme le fait le navigateur.
+    body.password = await prehashFor(password);
   }
 
   console.log('Envoi au serveur…');

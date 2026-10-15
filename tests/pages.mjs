@@ -14,7 +14,7 @@
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { webcrypto } from 'node:crypto';
 import { prehashFor } from '../scripts/lib/prehash.mjs';
-import { resetRateLimits } from './helpers/db.mjs';
+import { resetLocalDatabase } from './helpers/db.mjs';
 
 const BASE = (process.env.BASE_URL || 'http://127.0.0.1:8787').replace(/\/+$/, '');
 
@@ -158,7 +158,7 @@ function setValue(window, id, value) {
 /* ------------------------------------------------------------------ */
 
 async function main() {
-  resetRateLimits();
+  resetLocalDatabase();
   console.log(`\u001b[1mVN Kanban — tests des pages (jsdom)\u001b[0m  (${BASE})`);
 
   // Vérifie que le serveur répond
