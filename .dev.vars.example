@@ -1,0 +1,41 @@
+# ============================================================================
+#  Modèle de secrets — copiez ce fichier en « .dev.vars » pour le développement
+#  local, puis remplissez vos valeurs.
+#
+#  En production, ces valeurs ne vont PAS dans un fichier : elles se posent
+#  une par une avec :
+#      npx wrangler secret put PASSWORD_PEPPER
+#      npx wrangler secret put GOOGLE_CLIENT_ID
+#      npx wrangler secret put GOOGLE_CLIENT_SECRET
+# ============================================================================
+
+# Secret qui « poivre » les empreintes de mots de passe : même si la base est
+# volée, il faut aussi ce secret pour tester des mots de passe hors ligne.
+# Générez-le avec :  openssl rand -base64 48
+PASSWORD_PEPPER=
+
+# Google OAuth — https://console.cloud.google.com/apis/credentials
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Domaine public (facultatif). Exemple : https://kanban.mondomaine.com
+# Laissez vide pour détecter automatiquement l'origine de la requête.
+APP_URL=
+
+# Autoriser la création libre de comptes ? (true/false)
+ALLOW_SIGNUP=true
+
+# Le tout premier compte créé devient ROOT (true/false).
+# Passez à false une fois votre compte ROOT créé.
+FIRST_USER_IS_ROOT=true
+
+# Jeton à usage unique qui autorise la création du compte ROOT sur une
+# installation déjà déployée (voir scripts/create-root.mjs).
+# Générer avec : openssl rand -hex 24
+ROOT_BOOTSTRAP_TOKEN=
+
+# Envoi d'e-mails de réinitialisation (facultatif : sans cela, le ROOT génère
+# les liens depuis la console d'administration)
+RESEND_API_KEY=
+MAIL_FROM=VN Kanban <onboarding@resend.dev>
+MAIL_WEBHOOK_URL=

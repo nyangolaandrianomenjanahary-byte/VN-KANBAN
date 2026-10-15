@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "vn-kanban",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-10-01",
+  "upload_source_maps": true,
+
+  // L'appli (index.html, login.html, admin.html…) est servie directement par
+  // Cloudflare : ces fichiers ne consomment AUCUN temps CPU du Worker.
+  // Seules les routes /api/* exécutent le Worker (run_worker_first).
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Base de données SQLite hébergée par Cloudflare.
+  // ⚠️ Remplacez database_id par celui affiché par `npm run setup`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "vn-kanban-db",
+      "database_id": "REMPLACER_PAR_VOTRE_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Variables publiques (non secrètes). Les secrets se posent avec
+  // `npx wrangler secret put NOM_DU_SECRET` (voir .dev.vars.example).
+  "vars": {
+    "APP_NAME": "VN Kanban",
+    // Coût PBKDF2 côté serveur. 25000 est calibré pour l'offre GRATUITE de
+    // Cloudflare Workers (limite ~10 ms de CPU par requête).
+    // Avec l'offre payante (30 s de CPU) vous pouvez monter à 100000.
+    "PBKDF2_ITERATIONS": "25000",
+    // Le tout premier compte créé devient automatiquement ROOT.
+    // Passez à "false" après avoir créé votre compte ROOT.
+    "FIRST_USER_IS_ROOT": "true",
+    // Domaine public (facultatif) : utilisé pour les liens de réinitialisation.
+    "APP_URL": ""
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}
