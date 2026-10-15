@@ -76,7 +76,9 @@ n'est pas lisible par JavaScript : une faille XSS ne peut pas l'exfiltrer.
 
 L'application n'accepte de requêtes que si :
 
-1. l'en-tête `Origin` correspond à l'origine de la requête ou à `APP_URL` ;
+1. l'en-tête `Origin` correspond à l'origine de la requête ou à `APP_URL` — l'hôte est
+   comparé en plus de l'origine complète, afin de fonctionner derrière un relais inverse
+   (`X-Forwarded-Host`) tout en refusant toute origine tierce ;
 2. l'en-tête `X-VN-Client: web` (ou `cli`) est présent — en-tête personnalisé qu'un
    formulaire HTML ou une balise `<img>` d'un site tiers ne peut pas produire ;
 3. **CORS n'autorise aucune origine tierce** : nous ne renvoyons pas
@@ -186,7 +188,7 @@ Par honnêteté, voici les limites assumées :
 ## 11. Vérifier soi-même
 
 ```bash
-npm test                # 180 vérifications, dont force brute, CSRF, conflits, ROOT
+npm test                # 182 vérifications, dont force brute, CSRF, conflits, ROOT
 npm run test:google     # 31 vérifications : PKCE, état, signature RS256, jetons falsifiés
 ```
 
