@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="vn-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5856D6"/>
+      <stop offset="100%" stop-color="#0071E3"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="17" fill="url(#vn-grad)"/>
+  <g transform="translate(6.4 6.4) scale(0.2)">
+    <path d="M 72.0 98.0 L 122.0 250.0 L 124.0 251.0 L 124.0 130.0 L 122.0 243.0 L 74.0 99.0 Z M 94.0 5.0 L 73.0 11.0 L 47.0 26.0 L 40.0 79.0 L 36.0 36.0 L 15.0 59.0 L 31.0 126.0 L 2.0 87.0 L 31.0 213.0 Z M 117.0 3.0 L 123.0 119.0 L 124.0 106.0 L 119.0 13.0 L 121.0 13.0 L 195.0 231.0 L 211.0 219.0 L 225.0 204.0 L 238.0 184.0 L 245.0 168.0 L 227.0 131.0 L 228.0 129.0 L 249.0 153.0 L 252.0 120.0 L 245.0 85.0 L 234.0 62.0 L 217.0 40.0 L 205.0 155.0 L 195.0 227.0 L 119.0 3.0 Z" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke fill"/>
+    <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 73 99 L 123 250"/>
+      <path d="M 118 5 L 123 118"/>
+      <path d="M 120 13 L 195 230"/>
+    </g>
+  </g>
+</svg>

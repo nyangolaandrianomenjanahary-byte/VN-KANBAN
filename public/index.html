@@ -8553,9 +8553,9 @@
             '-webkit-backdrop-filter:saturate(180%) blur(24px);border:1px solid rgba(226,232,240,.9);border-radius:26px;',
             'box-shadow:0 28px 70px -20px rgba(15,23,42,.28),0 2px 8px rgba(15,23,42,.06);padding:32px 30px 26px;}',
             '.vnc-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;}',
-            '.vnc-logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,#0A84FF,#0057C8);display:flex;',
-            'align-items:center;justify-content:center;box-shadow:0 8px 20px -6px rgba(0,113,227,.65);flex-shrink:0;}',
-            '.vnc-logo svg{width:26px;height:26px;}',
+            '.vnc-logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#5856D6 0%,#0071E3 100%);display:flex;',
+            'align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,113,227,.26);flex-shrink:0;}',
+            '.vnc-logo svg{width:80%;height:80%;display:block;}',
             '.vnc-brand h1{font-size:19px;line-height:1.15;margin:0;color:var(--vn-ink);font-weight:700;letter-spacing:-.02em;}',
             '.vnc-brand p{margin:2px 0 0;font-size:12.5px;color:var(--vn-sub);font-weight:500;}',
             '.vnc-title{font-size:23px;font-weight:700;letter-spacing:-.03em;color:var(--vn-ink);margin:0 0 6px;}',
@@ -8613,9 +8613,6 @@
             '.vnc-foot{text-align:center;font-size:12.5px;color:var(--vn-sub);margin-top:18px;}',
             '.vnc-legal{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:18px;font-size:11px;color:#94A3B8;text-align:center;line-height:1.4;}',
             '.vnc-legal svg{width:13px;height:13px;flex-shrink:0;}',
-            '.vnc-server{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:10px;font-size:11px;color:#94A3B8;}',
-            '.vnc-dot{width:6px;height:6px;border-radius:50%;background:#12A150;}',
-            '.vnc-dot.off{background:#EF4444;}',
 
             /* ---- Account chip / menu ---- */
             '.vnc-account{position:relative;display:inline-flex;}',
@@ -8681,7 +8678,7 @@
     /*  Icônes                                                           */
     /* ------------------------------------------------------------------ */
     var I = {
-        logo: '<svg viewBox="0 0 32 32" fill="none"><path d="M6 8l6.2 16L16 14.5 19.8 24 26 8" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="8" r="2.6" fill="#9EE7FF"/></svg>',
+        logo: '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M 72.0 98.0 L 122.0 250.0 L 124.0 251.0 L 124.0 130.0 L 122.0 243.0 L 74.0 99.0 Z M 94.0 5.0 L 73.0 11.0 L 47.0 26.0 L 40.0 79.0 L 36.0 36.0 L 15.0 59.0 L 31.0 126.0 L 2.0 87.0 L 31.0 213.0 Z M 117.0 3.0 L 123.0 119.0 L 124.0 106.0 L 119.0 13.0 L 121.0 13.0 L 195.0 231.0 L 211.0 219.0 L 225.0 204.0 L 238.0 184.0 L 245.0 168.0 L 227.0 131.0 L 228.0 129.0 L 249.0 153.0 L 252.0 120.0 L 245.0 85.0 L 234.0 62.0 L 217.0 40.0 L 205.0 155.0 L 195.0 227.0 L 119.0 3.0 Z" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke fill"/><g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M 73 99 L 123 250"/><path d="M 118 5 L 123 118"/><path d="M 120 13 L 195 230"/></g></svg>',
         mail: '<svg class="vnc-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="m3 7 9 6 9-6"/></svg>',
         lock: '<svg class="vnc-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none"/></svg>',
         user: '<svg class="vnc-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></svg>',
@@ -8838,14 +8835,8 @@
 
         card.appendChild(el('div', { class: 'vnc-legal' }, [
             el('span', { html: I.shield }),
-            el('span', { text: 'Connexion chiffrée · Données isolées par utilisateur (RLS Supabase)' })
+            el('span', { text: 'Connexion chiffrée' })
         ]));
-
-        var serverState = el('div', { class: 'vnc-server' }, [
-            el('span', { class: 'vnc-dot', id: 'vnc-dot' }),
-            el('span', { id: 'vnc-server-label', text: 'Supabase · ' + SUPABASE_URL.replace('https://', '').split('.')[0] })
-        ]);
-        card.appendChild(serverState);
 
         overlay.appendChild(card);
         document.body.appendChild(overlay);
@@ -9408,7 +9399,7 @@
         var actions = document.querySelector('.header-actions');
         if (!actions || document.getElementById('vnc-account')) return;
 
-        var pill = el('div', { class: 'vnc-sync ok', id: 'vnc-sync-pill', title: 'Synchronisation Supabase' }, [
+        var pill = el('div', { class: 'vnc-sync ok', id: 'vnc-sync-pill', title: 'Synchronisation cloud' }, [
             el('span', { class: 'vnc-sdot' }),
             el('span', { class: 'vnc-sync-label', text: 'Synchronisé' })
         ]);
@@ -9433,7 +9424,7 @@
             await pushNow(true);
             await pullLatest(true);
             setSyncStatus('ok', 'Synchronisé');
-            toast('Synchronisé avec Supabase', 'success');
+            toast('Synchronisé', 'success');
         });
         menu.appendChild(itemSync);
 
@@ -9471,8 +9462,8 @@
             var oc = btn.getAttribute('onclick') || '';
             if (oc.indexOf('selectRootFolder') >= 0) {
                 btn.setAttribute('onclick', 'VN_CLOUD.syncNow()');
-                btn.title = 'Synchroniser avec Supabase';
-                btn.setAttribute('aria-label', 'Synchroniser avec Supabase');
+                btn.title = 'Synchroniser maintenant';
+                btn.setAttribute('aria-label', 'Synchroniser maintenant');
                 btn.innerHTML = I.sync.replace('<svg', '<svg width="15" height="15" style="vertical-align:-3px;margin-right:5px"') + 'Sync';
             }
         });
@@ -9598,7 +9589,7 @@
         if (!sb) {
             hideBootScreen();
             showAuthScreen();
-            showAlert('error', 'Configuration Supabase introuvable. Contactez l’administrateur.');
+            showAlert('error', 'Service momentanément indisponible. Contactez l’administrateur.');
             return false;
         }
 
@@ -9667,7 +9658,6 @@
         booted = true;
         buildAccountUI();
         subscribeRealtime();
-        updateServerDot(true);
 
         // Interception des sauvegardes de l'application → envoi cloud (débouncé)
         ['saveState', 'saveArchive'].forEach(function (fnName) {
@@ -9720,11 +9710,6 @@
         console.log('%c[VN Cloud] Synchronisation active', 'color:#0071E3;font-weight:bold', user && user.email);
     }
 
-    function updateServerDot(ok) {
-        var dot = document.getElementById('vnc-dot');
-        if (dot) dot.className = 'vnc-dot' + (ok ? '' : ' off');
-    }
-
     /* ------------------------------------------------------------------ */
     /*  API publique                                                      */
     /* ------------------------------------------------------------------ */
@@ -9745,7 +9730,7 @@
             await pushNow(true);
             await pullLatest(true);
             setSyncStatus('ok', 'Synchronisé');
-            if (typeof window.showToast === 'function') window.showToast('Synchronisé avec Supabase ⚡');
+            if (typeof window.showToast === 'function') window.showToast('Synchronisé ⚡');
         },
         pull: function () { return pullLatest(); },
         push: function () { return pushNow(true); },
