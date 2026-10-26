@@ -1,11 +1,11 @@
-import { PHOTO_BUCKET, supabase } from './supabase'
+import { PHOTO_BUCKET, backend } from './backend'
 import { prepareImage } from './images'
 
 /* ============================================================
    BOARD / COLUMNS
    ============================================================ */
 export async function fetchColumns(userId) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('board_columns')
     .select('*')
     .eq('user_id', userId)
@@ -21,7 +21,7 @@ export async function fetchColumns(userId) {
     { user_id: userId, title: 'En révision', accent: 'teal', position: 2, is_done: false },
     { user_id: userId, title: 'Terminé', accent: 'green', position: 3, is_done: true },
   ]
-  const { data: created, error: insertError } = await supabase
+  const { data: created, error: insertError } = await backend
     .from('board_columns')
     .insert(defaults)
     .select()
@@ -30,7 +30,7 @@ export async function fetchColumns(userId) {
 }
 
 export async function createColumn(userId, { title, accent, position }) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('board_columns')
     .insert({ user_id: userId, title, accent, position })
     .select()
@@ -40,7 +40,7 @@ export async function createColumn(userId, { title, accent, position }) {
 }
 
 export async function updateColumn(id, patch) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('board_columns')
     .update(patch)
     .eq('id', id)
@@ -51,7 +51,7 @@ export async function updateColumn(id, patch) {
 }
 
 export async function deleteColumn(id) {
-  const { error } = await supabase.from('board_columns').delete().eq('id', id)
+  const { error } = await backend.from('board_columns').delete().eq('id', id)
   if (error) throw error
 }
 
@@ -76,7 +76,7 @@ function sortTask(task) {
 }
 
 export async function fetchTasks(userId) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('tasks')
     .select(TASK_SELECT)
     .eq('user_id', userId)
@@ -86,7 +86,7 @@ export async function fetchTasks(userId) {
 }
 
 export async function createTask(userId, task) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('tasks')
     .insert({ ...task, user_id: userId })
     .select(TASK_SELECT)
@@ -96,7 +96,7 @@ export async function createTask(userId, task) {
 }
 
 export async function updateTask(id, patch) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('tasks')
     .update(patch)
     .eq('id', id)
@@ -107,21 +107,21 @@ export async function updateTask(id, patch) {
 }
 
 export async function deleteTask(id) {
-  const { data: photos } = await supabase
+  const { data: photos } = await backend
     .from('task_photos')
     .select('storage_path')
     .eq('task_id', id)
   if (photos?.length) {
-    await supabase.storage.from(PHOTO_BUCKET).remove(photos.map((p) => p.storage_path))
+    await backend.storage.from(PHOTO_BUCKET).remove(photos.map((p) => p.storage_path))
   }
-  const { error } = await supabase.from('tasks').delete().eq('id', id)
+  const { error } = await backend.from('tasks').delete().eq('id', id)
   if (error) throw error
 }
 
 export async function persistTaskOrder(updates) {
   // updates: [{ id, column_id, position, completed_at }]
   const results = await Promise.all(
-    updates.map(({ id, ...patch }) => supabase.from('tasks').update(patch).eq('id', id)),
+    updates.map(({ id, ...patch }) => backend.from('tasks').update(patch).eq('id', id)),
   )
   const failure = results.find((r) => r.error)
   if (failure) throw failure.error
@@ -134,7 +134,7 @@ export async function uploadTaskPhoto(userId, taskId, file, position = 0) {
   const prepared = await prepareImage(file)
   const path = `${userId}/${taskId}/${crypto.randomUUID()}.${prepared.extension}`
 
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await backend.storage
     .from(PHOTO_BUCKET)
     .upload(path, prepared.blob, {
       contentType: prepared.mimeType,
@@ -143,9 +143,9 @@ export async function uploadTaskPhoto(userId, taskId, file, position = 0) {
     })
   if (uploadError) throw uploadError
 
-  const { data: publicUrl } = supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path)
+  const { data: publicUrl } = backend.storage.from(PHOTO_BUCKET).getPublicUrl(path)
 
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('task_photos')
     .insert({
       task_id: taskId,
@@ -163,14 +163,14 @@ export async function uploadTaskPhoto(userId, taskId, file, position = 0) {
     .single()
 
   if (error) {
-    await supabase.storage.from(PHOTO_BUCKET).remove([path])
+    await backend.storage.from(PHOTO_BUCKET).remove([path])
     throw error
   }
   return data
 }
 
 export async function updatePhoto(id, patch) {
-  const { data, error } = await supabase
+  const { data, error } = await backend
     .from('task_photos')
     .update(patch)
     .eq('id', id)
@@ -181,9 +181,9 @@ export async function updatePhoto(id, patch) {
 }
 
 export async function deletePhoto(photo) {
-  const { error } = await supabase.from('task_photos').delete().eq('id', photo.id)
+  const { error } = await backend.from('task_photos').delete().eq('id', photo.id)
   if (error) throw error
   if (photo.storage_path) {
-    await supabase.storage.from(PHOTO_BUCKET).remove([photo.storage_path])
+    await backend.storage.from(PHOTO_BUCKET).remove([photo.storage_path])
   }
 }

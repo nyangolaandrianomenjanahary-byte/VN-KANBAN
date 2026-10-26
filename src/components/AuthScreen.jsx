@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { isConfigured, supabase } from '../lib/supabase'
+import { backend, isConfigured } from '../lib/backend'
 
 const MESSAGES = {
   'Invalid login credentials': 'E-mail ou mot de passe incorrect.',
@@ -34,7 +34,7 @@ export default function AuthScreen() {
 
     try {
       if (mode === 'signup') {
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await backend.auth.signUp({
           email: email.trim(),
           password,
           options: { data: { full_name: fullName.trim() } },
@@ -47,7 +47,7 @@ export default function AuthScreen() {
           setMode('signin')
         }
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await backend.auth.signInWithPassword({
           email: email.trim(),
           password,
         })
@@ -67,7 +67,7 @@ export default function AuthScreen() {
     }
     setBusy(true)
     setError('')
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    const { error: resetError } = await backend.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: window.location.origin,
     })
     setBusy(false)
@@ -170,12 +170,12 @@ export default function AuthScreen() {
         </form>
 
         <p className="auth-foot mono">
-          Vos tâches et vos photos sont enregistrées dans votre espace Supabase privé.
+          Vos tâches et vos photos sont enregistrées dans votre espace privé chiffré.
         </p>
 
         {!isConfigured && (
           <p className="alert alert-error">
-            Configuration manquante : renseignez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY
+            Configuration manquante : renseignez VITE_BACKEND_URL et VITE_BACKEND_KEY
             (variables d'environnement Vercel).
           </p>
         )}

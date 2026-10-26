@@ -9,7 +9,7 @@ import {
   updateTask,
   uploadTaskPhoto,
 } from '../lib/api'
-import { PRIORITIES } from '../lib/supabase'
+import { PRIORITIES } from '../lib/backend'
 
 const MAX_PHOTOS = 12
 const MAX_FILE_SIZE = 9 * 1024 * 1024
@@ -130,7 +130,7 @@ export default function TaskDialog({
       return
     }
 
-    // Tâche déjà enregistrée : envoi immédiat vers Supabase Storage.
+    // Tâche déjà enregistrée : envoi immédiat vers le stockage distant.
     setUploading(true)
     let current = photos
     let currentCover = coverId

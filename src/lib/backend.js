@@ -1,20 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+const backendKey =
+  import.meta.env.VITE_BACKEND_KEY || import.meta.env.VITE_BACKEND_PUBLIC_KEY
 
-export const isConfigured = Boolean(supabaseUrl && supabaseKey)
+export const isConfigured = Boolean(backendUrl && backendKey)
 
-export const supabase = isConfigured
-  ? createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-    })
-  : null
+export function createBackendClient(url, key) {
+  return createClient(url, key, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  })
+}
+
+export const backend = isConfigured ? createBackendClient(backendUrl, backendKey) : null
 
 export const PHOTO_BUCKET = 'task-photos'
 

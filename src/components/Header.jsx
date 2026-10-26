@@ -38,7 +38,7 @@ export default function Header({
             />
           </div>
 
-          <button type="button" className="icon-btn" onClick={onRefresh} title="Rafraîchir depuis Supabase">
+          <button type="button" className="icon-btn" onClick={onRefresh} title="Rafraîchir depuis le serveur">
             ↻
           </button>
 
