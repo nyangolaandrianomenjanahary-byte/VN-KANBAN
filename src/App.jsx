@@ -4,7 +4,7 @@ import Header from './components/Header'
 import Board from './components/Board'
 import TaskDialog from './components/TaskDialog'
 import Lightbox from './components/Lightbox'
-import { isConfigured, supabase } from './lib/supabase'
+import { backend, isConfigured } from './lib/backend'
 import {
   createColumn,
   deleteColumn,
@@ -45,11 +45,11 @@ export default function App() {
       setAuthReady(true)
       return
     }
-    supabase.auth.getSession().then(({ data }) => {
+    backend.auth.getSession().then(({ data }) => {
       setSession(data.session)
       setAuthReady(true)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: sub } = backend.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
       if (!nextSession) {
         setColumns([])
@@ -240,7 +240,7 @@ export default function App() {
         syncing={syncing}
         onNewTask={() => setDialog({ task: null, columnId: columns[0]?.id })}
         onRefresh={() => loadBoard(user.id, { silent: true })}
-        onSignOut={() => supabase.auth.signOut()}
+        onSignOut={() => backend.auth.signOut()}
       />
 
       <main className="app-main">

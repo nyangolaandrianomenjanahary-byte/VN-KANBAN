@@ -1,6 +1,6 @@
 -- ============================================================
 -- VN KANBAN — Schéma Kanban + photos de tâches
--- Projet Supabase : unqfifaiywxuoqqtunya
+-- Base de données du projet distant (ancien prototype)
 -- Idempotent : peut être rejoué sans erreur.
 -- ============================================================
 

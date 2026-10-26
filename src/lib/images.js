@@ -1,5 +1,5 @@
 /**
- * Compression côté navigateur avant l'envoi vers Supabase Storage.
+ * Compression côté navigateur avant l'envoi vers le stockage distant.
  * Les photos de téléphone (3–8 Mo) sont ramenées à ~200–600 Ko,
  * ce qui garde l'application rapide même sur réseau mobile.
  */

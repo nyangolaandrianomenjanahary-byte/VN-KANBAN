@@ -1,12 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBackendClient } from './lib/backend'
 import Sortable from 'sortablejs'
 import legacySource from './legacy/app.js?raw'
 
 window.Sortable = Sortable
-// Public browser key only. Authorization is enforced by Supabase RLS.
-const db = createClient(import.meta.env.VITE_SUPABASE_URL || 'https://unqfifaiywxuoqqtunya.supabase.co', import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_Edxk7DifMOT8AB2FAV3CyQ_eDzsv14Y')
+// Adresse et clé publique du backend, fournies par l'environnement (Vercel ou .env local).
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+const backendKey = import.meta.env.VITE_BACKEND_KEY || import.meta.env.VITE_BACKEND_PUBLIC_KEY
+const configured = Boolean(backendUrl && backendKey)
+// Clé publique navigateur uniquement : les droits d'accès sont vérifiés côté serveur.
+const db = configured ? createBackendClient(backendUrl, backendKey) : null
 const auth = document.getElementById('cloud-auth')
 const toolbar = document.getElementById('cloud-toolbar')
+const headerLogout = document.getElementById('header-logout')
 let user, revision = 0, dirty = false, saving = false, timer, started = false, conflict = false, generation = 0
 const urls = new Map()
 const status = (text, retry = false) => {
@@ -42,7 +47,7 @@ async function save() {
     dirty = generation !== version
     if (dirty) backup()
     else localStorage.removeItem(cacheKey())
-    status(dirty ? 'Modifications en attente…' : 'Synchronisé avec Supabase')
+    status(dirty ? 'Modifications en attente…' : 'Synchronisé')
   } catch (error) { status(error.message || 'Échec réseau : copie locale conservée', true) }
   finally { saving = false; if (dirty && !conflict) { clearTimeout(timer); timer = setTimeout(save, 10000) } }
 }
@@ -50,14 +55,18 @@ document.getElementById('cloud-retry').onclick = () => {
   if (!conflict) { save(); return }
   const blob = new Blob([JSON.stringify(window.vnLegacy.snapshot(), null, 2)], {type:'application/json'})
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vn-copie-locale.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000)
-  if (confirm('Copie exportée. Charger maintenant la version Supabase ? Vos modifications locales resteront dans le fichier exporté.')) { localStorage.removeItem(cacheKey()); location.reload() }
+  if (confirm('Copie exportée. Charger maintenant la version du serveur ? Vos modifications locales resteront dans le fichier exporté.')) { localStorage.removeItem(cacheKey()); location.reload() }
 }
-document.getElementById('cloud-logout').onclick = async () => {
+// Déconnexion : reprise des modifications en attente, puis fermeture de la session.
+async function logout() {
   if (dirty) { await save(); if (dirty && !confirm('Des modifications ne sont pas encore synchronisées. Elles resteront sauvegardées sur cet appareil. Se déconnecter ?')) return }
-  const {error} = await db.auth.signOut()
+  const { error } = await db.auth.signOut()
   if (error) { status(error.message, true); return }
   location.reload()
 }
+window.vnLogout = logout
+document.getElementById('cloud-logout').onclick = logout
+if (headerLogout) headerLogout.onclick = logout
 window.addEventListener('beforeunload', e => { if (dirty) { backup(); e.preventDefault(); e.returnValue = '' } })
 window.addEventListener('online', save)
 
@@ -179,7 +188,7 @@ async function boot(session) {
     auth.innerHTML = ''; document.body.classList.remove('locked'); toolbar.hidden = false
     if (conflict) status('Conflit : exportez la copie locale avant de recharger', true)
     else if (dirty) await save()
-    else status('Synchronisé avec Supabase')
+    else status('Synchronisé')
     setInterval(async () => {
       if (dirty || saving || conflict || document.querySelector('.modal-overlay')) return
       const version = generation
@@ -190,11 +199,11 @@ async function boot(session) {
         try { await signPhotos(data); if (dirty || saving || generation !== version) return; revision = data.revision; window.vnLegacy.load(data); window.vnLegacy.render() }
         catch { status('Impossible de charger les photos', true) }
       }
-      status('Synchronisé avec Supabase')
+      status('Synchronisé')
     }, 10000)
   } catch (error) {
     auth.innerHTML = `<div class="cloud-panel"><h1>Chargement impossible</h1><p class="cloud-error">${escape(error.message)}</p><button onclick="location.reload()">Réessayer</button><button id="boot-logout">Déconnexion</button></div>`
-    document.getElementById('boot-logout').onclick = async () => { await db.auth.signOut(); location.reload() }
+    document.getElementById('boot-logout').onclick = () => logout()
   }
 }
 function showAuth(mode = 'login') {
@@ -216,15 +225,19 @@ function showAuth(mode = 'login') {
   }
 }
 let recovery = location.hash.includes('type=recovery')
-db.auth.onAuthStateChange((event) => {
-  if (event === 'PASSWORD_RECOVERY') { recovery = true; showRecovery() }
-  if (event === 'SIGNED_OUT' && started) location.reload()
-})
 function showRecovery() {
   auth.innerHTML = '<form class="cloud-panel"><h1>Nouveau mot de passe</h1><label>Mot de passe<input type="password" name="password" minlength="8" autocomplete="new-password" required></label><p role="status"></p><button type="submit">Enregistrer</button></form>'
   auth.querySelector('form').onsubmit = async e => { e.preventDefault(); const button=e.target.querySelector('button'); button.disabled=true; const {error}=await db.auth.updateUser({password:e.target.password.value}); if(error) {e.target.querySelector('p').textContent=error.message;button.disabled=false} else {history.replaceState(null,'',location.pathname);location.reload()} }
 }
 async function main() {
+  if (!configured) {
+    auth.innerHTML = '<div class="cloud-panel"><h1>Configuration incomplète</h1><p class="cloud-error">Renseignez VITE_BACKEND_URL et VITE_BACKEND_KEY dans les variables d\'environnement, puis rechargez cette page.</p><button onclick="location.reload()">Réessayer</button></div>'
+    return
+  }
+  db.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') { recovery = true; showRecovery() }
+    if (event === 'SIGNED_OUT' && started) location.reload()
+  })
   showAuth()
   try { const {data,error} = await db.auth.getSession(); if(error) throw error; if(recovery) showRecovery(); else if(data.session) await boot(data.session) }
   catch(error) { document.getElementById('auth-message').textContent=error.message }

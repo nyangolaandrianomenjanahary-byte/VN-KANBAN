@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "VN Kanban \u2014 gestion de t\u00e2ches avec photos, Supabase + Vercel",
+  "description": "VN Kanban \u2014 gestion de t\u00e2ches avec photos, synchronisation cloud + Vercel",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

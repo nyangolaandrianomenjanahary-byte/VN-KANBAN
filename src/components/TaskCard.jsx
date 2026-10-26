@@ -1,4 +1,4 @@
-import { PRIORITIES } from '../lib/supabase'
+import { PRIORITIES } from '../lib/backend'
 
 function formatDue(dateStr) {
   if (!dateStr) return null

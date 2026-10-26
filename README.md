@@ -7,13 +7,13 @@ historique est `src/legacy/app.js`.
 
 ## Nouveautés
 
-- Connexion, inscription et récupération du mot de passe via Supabase Auth.
+- Connexion, inscription et récupération du mot de passe via le service d'authentification.
 - Espace privé par utilisateur : tâches, colonnes, notes et archives dans
   `public.vn_workspaces` (RLS). Les anciennes tables ne sont pas supprimées.
 - Sauvegarde automatique avec indicateur, reprise réseau et copie locale des
   modifications en attente, isolée par compte. Un conflit de versions ne remplace
   pas silencieusement les données : exporter la copie locale puis recharger.
-- Actualisation depuis Supabase toutes les 10 secondes hors édition de formulaire.
+- Actualisation depuis le serveur toutes les 10 secondes hors édition de formulaire.
 - Jusqu'à 12 photos dans la description (JPEG, PNG, WebP, 9 Mo par fichier).
   Upload depuis la création/modification, aperçu sur la carte et dans le détail,
   ouverture grand format. Bucket **privé** `vn-task-images`, accès par URL signée.
@@ -28,15 +28,17 @@ Utiliser l'import de l'application pour reprendre un export JSON de ses données
 
 ## Configuration
 
-La migration `supabase/migrations/0002_workspace.sql` a été appliquée au projet
-`unqfifaiywxuoqqtunya`. Elle ajoute seulement la nouvelle table et le bucket privé.
+La migration `db/migrations/0002_workspace.sql` a été appliquée au projet distant.
+Elle ajoute seulement la nouvelle table et le bucket privé.
 La migration 0001 concerne l'ancien prototype, pas le nouveau modèle.
 
-La configuration publique de ce projet est fournie par défaut dans `cloud.js`.
-On peut la remplacer via `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
-Ne jamais utiliser une clé `service_role` / `sb_secret` dans une variable `VITE_*`.
+La configuration du backend n'est plus écrite dans le code : elle est lue dans
+`VITE_BACKEND_URL` et `VITE_BACKEND_KEY` (copiez `.env.example` vers `.env` en
+local, et renseignez ces deux variables dans les réglages du projet Vercel).
+Ne jamais exposer une clé secrète dans une variable `VITE_*`.
 
-Supabase Auth doit autoriser le domaine de production dans ses Redirect URLs.
+Le service d'authentification doit autoriser le domaine de production dans ses
+Redirect URLs.
 L'authentification e-mail est déjà active. La configuration existante confirme
 immédiatement les inscriptions (pas de validation e-mail imposée). Pour une mise
 à disposition publique, activer la confirmation des e-mails et configurer un SMTP.
@@ -54,7 +56,7 @@ npm run dev -- --host 0.0.0.0
 Le test DOM vérifie le démarrage de l'interface fournie, la création d'une tâche
 avec métadonnées photo et le formulaire d'édition. Il ne remplace pas les tests
 Auth/Storage dans un navigateur connecté : le réseau du sandbox ne permet pas
-l'accès direct aux domaines Supabase. La compilation et l'audit npm sont exécutés.
+l'accès direct au domaine du backend. La compilation et l'audit npm sont exécutés.
 
 ## Vercel
 
