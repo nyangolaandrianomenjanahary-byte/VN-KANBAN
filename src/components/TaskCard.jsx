@@ -13,7 +13,7 @@ function formatDue(dateStr) {
   return { label, tone: 'normal', suffix: null }
 }
 
-export default function TaskCard({ task, onOpen, onDragStart, onDragEnd, dragging, onOpenPhoto }) {
+export default function TaskCard({ task, onOpen, onDragStart, onDragEnd, dragging, onOpenPhoto, draggable = true }) {
   const photos = task.photos || []
   const cover = photos.find((p) => p.id === task.cover_photo_id) || photos[0]
   const priority = PRIORITIES.find((p) => p.value === task.priority) || PRIORITIES[1]
@@ -23,8 +23,9 @@ export default function TaskCard({ task, onOpen, onDragStart, onDragEnd, draggin
   return (
     <article
       className={`task-card${dragging ? ' is-dragging' : ''}${done ? ' is-done' : ''}`}
-      draggable
+      draggable={draggable}
       onDragStart={(e) => {
+        if (!draggable) return
         e.dataTransfer.effectAllowed = 'move'
         e.dataTransfer.setData('text/plain', task.id)
         onDragStart(task)

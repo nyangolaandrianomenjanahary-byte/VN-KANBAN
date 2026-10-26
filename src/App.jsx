@@ -8,6 +8,7 @@ import { isConfigured, supabase } from './lib/supabase'
 import {
   createColumn,
   deleteColumn,
+  deleteTask,
   fetchColumns,
   fetchTasks,
   persistTaskOrder,
@@ -203,6 +204,11 @@ export default function App() {
     )
       return
     try {
+      // Supprime les cartes une à une pour nettoyer aussi les photos du Storage.
+      const doomed = tasks.filter((t) => t.column_id === column.id)
+      for (const item of doomed) {
+        await deleteTask(item.id)
+      }
       await deleteColumn(column.id)
       setColumns((prev) => prev.filter((c) => c.id !== column.id))
       setTasks((prev) => prev.filter((t) => t.column_id !== column.id))

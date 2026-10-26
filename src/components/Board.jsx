@@ -51,7 +51,7 @@ export default function Board({
   }
 
   function drop(columnId) {
-    if (!drag) return
+    if (!drag || search) return
     const target = over?.columnId === columnId ? over.index : byColumn.get(columnId)?.length ?? 0
     onMoveTask(drag.taskId, columnId, target)
     setDrag(null)
@@ -135,6 +135,7 @@ export default function Board({
                   {markerIndex === index && <div className="drop-marker" aria-hidden="true" />}
                   <TaskCard
                     task={task}
+                    draggable={!search}
                     dragging={drag?.taskId === task.id}
                     onOpen={onOpenTask}
                     onOpenPhoto={onOpenPhoto}
