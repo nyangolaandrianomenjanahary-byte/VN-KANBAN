@@ -12,7 +12,7 @@ import {
 import { PRIORITIES } from '../lib/supabase'
 
 const MAX_PHOTOS = 12
-const MAX_FILE_SIZE = 15 * 1024 * 1024
+const MAX_FILE_SIZE = 9 * 1024 * 1024
 
 function emptyForm(defaultColumnId) {
   return {
@@ -101,7 +101,7 @@ export default function TaskDialog({
     const accepted = []
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
-        notify(`« ${file.name} » dépasse 15 Mo.`, 'error')
+        notify(`« ${file.name} » dépasse 9 Mo.`, 'error')
         continue
       }
       if (photos.length + pending.length + accepted.length >= MAX_PHOTOS) {

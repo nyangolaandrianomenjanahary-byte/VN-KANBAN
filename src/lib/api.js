@@ -58,12 +58,15 @@ export async function deleteColumn(id) {
 /* ============================================================
    TASKS
    ============================================================ */
-const TASK_SELECT = `
-  id, user_id, column_id, title, description, priority, due_date, labels,
-  position, completed_at, cover_photo_id, created_at, updated_at,
-  photos:task_photos (id, task_id, url, storage_path, file_name, mime_type,
-                      size_bytes, width, height, caption, position, created_at)
-`
+const TASK_SELECT = [
+  'id, user_id, column_id, title, description, priority, due_date, labels,',
+  'position, completed_at, cover_photo_id, created_at, updated_at,',
+  'photos:task_photos (id, task_id, url, storage_path, file_name, mime_type,',
+  'size_bytes, width, height, caption, position, created_at)',
+]
+  .join(' ')
+  .replace(/\s+/g, ' ')
+  .trim()
 
 function sortTask(task) {
   return {

@@ -29,7 +29,10 @@ dans un dossier par utilisateur (`<user_id>/<task_id>/<uuid>.jpg`), avec des
 politiques d'écriture limitées au dossier de l'utilisateur.
 
 Les images sont compressées côté navigateur (max 1800 px, JPEG qualité 82)
-avant l'envoi, pour rester rapides sur réseau mobile.
+avant l'envoi, pour rester rapides sur réseau mobile. Formats recommandés :
+JPEG, PNG, WebP (9 Mo max par fichier, 12 photos max par tâche). Les fichiers
+HEIC sont acceptés ; ils sont convertis automatiquement si le navigateur sait
+les décoder, sinon envoyés tels quels.
 
 ## Variables d'environnement
 
