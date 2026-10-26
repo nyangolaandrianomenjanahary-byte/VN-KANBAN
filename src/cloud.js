@@ -69,36 +69,84 @@ async function signPhotos(payload) {
   for (const p of data || []) if (p.signedUrl) urls.set(p.path, p.signedUrl)
 }
 window.vnPhotoGallery = photos => `<div class="vn-photos">${photos.filter(p => urls.has(p.path)).map(p => `<a href="${escape(urls.get(p.path))}" target="_blank" rel="noopener"><img src="${escape(urls.get(p.path))}" alt="${escape(p.name || 'Photo de la tâche')}" loading="lazy"></a>`).join('')}</div>`
-window.vnPhotoEditor = photos => `<div class="vn-photo-editor" data-photos="${escape(JSON.stringify(photos))}"><label>Photos de la description<input type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="vnUploadPhotos(this)"></label><small>JPEG, PNG ou WebP · 9 Mo maximum · 12 photos par tâche. Cliquez sur une photo pour l’ouvrir.</small><div class="vn-photo-list">${photoList(photos)}</div><p role="status" class="vn-photo-message"></p></div>`
-function photoList(photos) { return window.vnPhotoGallery(photos) + photos.map((p,i) => `<button type="button" onclick="vnRemovePhoto(this,${i})">Retirer ${escape(p.name || 'la photo')}</button>`).join('') }
+
+// Éditeur de photos minimaliste : une commande discrète, des vignettes, aucun texte natif.
+const photoAddGlyph = '<svg class="vn-photo-add-glyph" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8.2v7.6M8.2 12h7.6"></path></svg>'
+const photoAddTile = () => `<label class="vn-photo-add" title="Ajouter des photos"><input type="file" accept="image/jpeg,image/png,image/webp" multiple aria-label="Ajouter des photos" onchange="vnUploadPhotos(this)">${photoAddGlyph}<span>Ajouter</span></label>`
+function photoList(photos) {
+  return photos.map((p, i) => {
+    const url = urls.get(p.path)
+    if (!url) return ''
+    return `<figure class="vn-photo-thumb"><a class="vn-photo-open" href="${escape(url)}" target="_blank" rel="noopener" aria-label="Ouvrir la photo"><img src="${escape(url)}" alt="${escape(p.name || 'Photo de la tâche')}" loading="lazy"></a><button type="button" class="vn-photo-remove" onclick="vnRemovePhoto(this,${i})" title="Retirer la photo" aria-label="Retirer la photo"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></figure>`
+  }).join('')
+}
+function renderPhotos(editor, photos) {
+  if (!editor) return
+  editor.dataset.photos = JSON.stringify(photos)
+  editor.classList.toggle('has-photos', photos.length > 0)
+  editor.classList.toggle('is-full', photos.length >= 12)
+  const list = editor.querySelector('.vn-photo-list')
+  if (list) list.innerHTML = photoList(photos)
+}
+window.vnPhotoEditor = photos => {
+  const list = Array.isArray(photos) ? photos : []
+  return `<div class="vn-photo-editor${list.length ? ' has-photos' : ''}${list.length >= 12 ? ' is-full' : ''}" data-photos="${escape(JSON.stringify(list))}" ondragover="vnDragPhotos(event,this)" ondragleave="vnDragPhotos(event,this,true)" ondrop="vnDropPhotos(event,this)"><div class="vn-photo-list">${photoList(list)}</div>${photoAddTile()}<p role="status" aria-live="polite" class="vn-photo-message"></p></div>`
+}
 window.vnDraftPhotos = () => JSON.parse(document.querySelector('#card-description')?.parentElement.querySelector('.vn-photo-editor')?.dataset.photos || '[]')
 window.vnRemovePhoto = (button, index) => {
-  const editor = button.closest('.vn-photo-editor'); const photos = JSON.parse(editor.dataset.photos); photos.splice(index, 1); editor.dataset.photos = JSON.stringify(photos); editor.querySelector('.vn-photo-list').innerHTML = photoList(photos)
+  const editor = button.closest('.vn-photo-editor')
+  if (!editor) return
+  const photos = JSON.parse(editor.dataset.photos || '[]')
+  photos.splice(index, 1)
+  renderPhotos(editor, photos)
 }
-window.vnUploadPhotos = async input => {
-  const editor = input.closest('.vn-photo-editor'), message = editor.querySelector('.vn-photo-message')
-  const photos = JSON.parse(editor.dataset.photos)
-  input.disabled = true
+window.vnDragPhotos = (event, editor, leaving = false) => {
+  event.preventDefault()
+  if (leaving) editor.classList.remove('is-drop')
+  else editor.classList.add('is-drop')
+}
+window.vnDropPhotos = (event, editor) => {
+  event.preventDefault()
+  editor.classList.remove('is-drop')
+  const files = Array.from(event.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'))
+  if (files.length) uploadPhotos(editor, files)
+}
+async function uploadPhotos(editor, files) {
+  if (!editor || !files.length) return
+  const message = editor.querySelector('.vn-photo-message')
+  const setMessage = (text, isError = false) => {
+    if (!message) return
+    message.textContent = text
+    message.classList.toggle('is-error', isError)
+  }
+  const photos = JSON.parse(editor.dataset.photos || '[]')
+  editor.classList.add('is-uploading')
   // Disable save while uploads are in progress (including inline modal buttons).
   const buttons = [...(editor.closest('.modal-overlay') || editor).querySelectorAll('button')]
   const enabled = buttons.filter(b => !b.disabled); enabled.forEach(b => b.disabled = true)
   try {
-    for (const file of input.files) {
+    for (const [i, file] of files.entries()) {
       if (photos.length >= 12) throw new Error('Maximum 12 photos par tâche.')
       if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 9437184) throw new Error('Choisissez une image JPEG, PNG ou WebP de moins de 9 Mo.')
-      message.textContent = `Envoi de ${file.name}…`
+      setMessage(files.length > 1 ? `Envoi ${i + 1}/${files.length}…` : 'Envoi…')
       const path = `${user.id}/${crypto.randomUUID()}.${{ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp' }[file.type]}`
       const { error } = await db.storage.from('vn-task-images').upload(path, file, {contentType:file.type})
       if (error) throw error
       const { data, error: signError } = await db.storage.from('vn-task-images').createSignedUrl(path, 86400)
       if (signError) throw signError
       urls.set(path, data.signedUrl); photos.push({path, name:file.name})
-      editor.dataset.photos = JSON.stringify(photos)
-      editor.querySelector('.vn-photo-list').innerHTML = photoList(photos)
+      renderPhotos(editor, photos)
     }
-    message.textContent = 'Photos ajoutées. Enregistrez la tâche pour les conserver.'
-  } catch (error) { message.textContent = error.message }
-  finally { input.disabled = false; input.value = ''; enabled.forEach(b => b.disabled = false) }
+    // Succès silencieux : les vignettes suffisent, aucun message ne reste à l'écran.
+    setMessage('')
+  } catch (error) { setMessage(error.message, true) }
+  finally { editor.classList.remove('is-uploading'); enabled.forEach(b => b.disabled = false) }
+}
+window.vnUploadPhotos = input => {
+  const editor = input.closest('.vn-photo-editor')
+  const files = Array.from(input.files || [])
+  input.value = ''
+  if (editor && files.length) uploadPhotos(editor, files)
 }
 
 async function boot(session) {
