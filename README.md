@@ -49,7 +49,30 @@ npm run dev      # http://localhost:5173
 npm run build    # build de production dans dist/
 ```
 
-## Déploiement
+## Déploiement Vercel
 
-Le projet est connecté à Vercel (`vn-kanban`). Chaque `git push` sur `main`
-déclenche un déploiement de production.
+1. Ouvrir <https://vercel.com/new> et importer le dépôt
+   `nyangolaandrianomenjanahary-byte/VN-KANBAN`.
+2. Framework détecté : **Vite** — Build `npm run build`, Output `dist`.
+3. Ajouter les variables d'environnement (Production + Preview + Development) :
+
+   | Nom | Valeur |
+   | --- | --- |
+   | `VITE_SUPABASE_URL` | `https://unqfifaiywxuoqqtunya.supabase.co` |
+   | `VITE_SUPABASE_ANON_KEY` | clé **publishable** du projet Supabase (Settings → API Keys) |
+
+4. Déployer : chaque `git push` sur `main` redéploie automatiquement.
+
+Sans interface Vercel, en ligne de commande :
+
+```bash
+npm i -g vercel
+vercel link          # crée/associe le projet
+vercel env add VITE_SUPABASE_URL production
+vercel env add VITE_SUPABASE_ANON_KEY production
+vercel --prod
+```
+
+Une fois l'URL de production connue, l'ajouter dans Supabase
+(Authentication → URL Configuration → Redirect URLs) si elle ne finit pas par
+`*.vercel.app`.
