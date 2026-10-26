@@ -1,81 +1,65 @@
-# VN Kanban
+# VN — Gestionnaire de tâches
 
-Application Kanban de gestion de tâches — React + Vite, données et photos sur **Supabase**,
-hébergée sur **Vercel**.
+Interface issue de `VN-Gestionnaire-taches.html`, conservant le Kanban, le calendrier,
+les notes, les récurrences et les chronomètres. L'ancien prototype React reste dans
+`src/` pour référence ; le point d'entrée actif est `src/cloud.js` et le moteur
+historique est `src/legacy/app.js`.
 
-## Fonctionnalités
+## Nouveautés
 
-- Authentification e-mail / mot de passe (Supabase Auth).
-- Tableau Kanban : colonnes renommables, ajout/suppression, glisser-déposer des cartes.
-- Tâches : titre, description, priorité, échéance, étiquettes.
-- **Photos dans la description** : jusqu'à 12 photos par tâche, glisser-déposer,
-  coller (Ctrl+V) ou appareil photo sur mobile. Photo de couverture, légendes,
-  aperçu plein écran (flèches clavier), suppression.
-- Recherche plein texte, statistiques, interface responsive (mobile → desktop).
+- Connexion, inscription et récupération du mot de passe via Supabase Auth.
+- Espace privé par utilisateur : tâches, colonnes, notes et archives dans
+  `public.vn_workspaces` (RLS). Les anciennes tables ne sont pas supprimées.
+- Sauvegarde automatique avec indicateur, reprise réseau et copie locale des
+  modifications en attente, isolée par compte. Un conflit de versions ne remplace
+  pas silencieusement les données : exporter la copie locale puis recharger.
+- Actualisation depuis Supabase toutes les 10 secondes hors édition de formulaire.
+- Jusqu'à 12 photos dans la description (JPEG, PNG, WebP, 9 Mo par fichier).
+  Upload depuis la création/modification, aperçu sur la carte et dans le détail,
+  ouverture grand format. Bucket **privé** `vn-task-images`, accès par URL signée.
+- Les photos retirées d'une tâche ou envoyées dans un formulaire annulé restent
+  dans le bucket (pas de suppression physique automatique, pour éviter de casser
+  une autre référence). Prévoir un nettoyage des fichiers orphelins à terme.
 
-## Base de données
+Les archives personnelles intégrées au fichier fourni ne sont pas publiées dans
+le bundle et ne sont pas copiées dans les comptes nouvellement créés. L'ancien
+stockage local non authentifié et le dossier Root ne sont pas importés automatiquement.
+Utiliser l'import de l'application pour reprendre un export JSON de ses données.
 
-Le schéma complet est versionné dans [`supabase/migrations/0001_kanban_with_photos.sql`](supabase/migrations/0001_kanban_with_photos.sql).
+## Configuration
 
-| Table | Rôle |
-| --- | --- |
-| `board_columns` | Colonnes du tableau (par utilisateur) |
-| `tasks` | Tâches (description, priorité, échéance, étiquettes, `cover_photo_id`) |
-| `task_photos` | Métadonnées des photos : `storage_path`, `url`, dimensions, taille, légende |
+La migration `supabase/migrations/0002_workspace.sql` a été appliquée au projet
+`unqfifaiywxuoqqtunya`. Elle ajoute seulement la nouvelle table et le bucket privé.
+La migration 0001 concerne l'ancien prototype, pas le nouveau modèle.
 
-Chaque table est protégée par **RLS** (`auth.uid() = user_id`).
-Les fichiers sont stockés dans le bucket Storage public `task-photos`,
-dans un dossier par utilisateur (`<user_id>/<task_id>/<uuid>.jpg`), avec des
-politiques d'écriture limitées au dossier de l'utilisateur.
+La configuration publique de ce projet est fournie par défaut dans `cloud.js`.
+On peut la remplacer via `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
+Ne jamais utiliser une clé `service_role` / `sb_secret` dans une variable `VITE_*`.
 
-Les images sont compressées côté navigateur (max 1800 px, JPEG qualité 82)
-avant l'envoi, pour rester rapides sur réseau mobile. Formats recommandés :
-JPEG, PNG, WebP (9 Mo max par fichier, 12 photos max par tâche). Les fichiers
-HEIC sont acceptés ; ils sont convertis automatiquement si le navigateur sait
-les décoder, sinon envoyés tels quels.
+Supabase Auth doit autoriser le domaine de production dans ses Redirect URLs.
+L'authentification e-mail est déjà active. La configuration existante confirme
+immédiatement les inscriptions (pas de validation e-mail imposée). Pour une mise
+à disposition publique, activer la confirmation des e-mails et configurer un SMTP.
+Les liens de récupération utilisent le domaine courant.
 
-## Variables d'environnement
+## Développement et vérifications
 
-```bash
-VITE_SUPABASE_URL=https://unqfifaiywxuoqqtunya.supabase.co
-VITE_SUPABASE_ANON_KEY=<clé anon / publishable>
+```sh
+npm ci
+npm test
+npm run build
+npm run dev -- --host 0.0.0.0
 ```
 
-En local : copier `.env.example` vers `.env.local`.
-Sur Vercel : Project → Settings → Environment Variables (Production + Preview).
+Le test DOM vérifie le démarrage de l'interface fournie, la création d'une tâche
+avec métadonnées photo et le formulaire d'édition. Il ne remplace pas les tests
+Auth/Storage dans un navigateur connecté : le réseau du sandbox ne permet pas
+l'accès direct aux domaines Supabase. La compilation et l'audit npm sont exécutés.
 
-## Développement
+## Vercel
 
-```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # build de production dans dist/
-```
-
-## Déploiement Vercel
-
-1. Ouvrir <https://vercel.com/new> et importer le dépôt
-   `nyangolaandrianomenjanahary-byte/VN-KANBAN`.
-2. Framework détecté : **Vite** — Build `npm run build`, Output `dist`.
-3. Ajouter les variables d'environnement (Production + Preview + Development) :
-
-   | Nom | Valeur |
-   | --- | --- |
-   | `VITE_SUPABASE_URL` | `https://unqfifaiywxuoqqtunya.supabase.co` |
-   | `VITE_SUPABASE_ANON_KEY` | clé **publishable** du projet Supabase (Settings → API Keys) |
-
-4. Déployer : chaque `git push` sur `main` redéploie automatiquement.
-
-Sans interface Vercel, en ligne de commande :
-
-```bash
-npm i -g vercel
-vercel link          # crée/associe le projet
-vercel env add VITE_SUPABASE_URL production
-vercel env add VITE_SUPABASE_ANON_KEY production
-vercel --prod
-```
-
-Une fois l'URL de production connue, l'ajouter dans Supabase
-(Authentication → URL Configuration → Redirect URLs) si elle ne finit pas par
-`*.vercel.app`.
+Projet Vite, build `npm run build`, dossier de sortie `dist`.
+La connexion Vercel de cette session ne retourne aucun projet accessible et
+refuse la consultation des équipes. Le déploiement de production nécessite une
+connexion Vercel autorisée pour l'équipe/projet existant. Aucun nouveau projet
+Vercel n'a été créé pour contourner ce blocage.
